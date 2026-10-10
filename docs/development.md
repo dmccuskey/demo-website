@@ -11,16 +11,19 @@ How the Demo Website is developed: the rules that hold throughout, what is built
 
 ## Current Baseline
 
-As of 2026-10-09, the repository holds the design only: the [architecture](architecture.md), the [hosting contract](hosting-contract.md), and the [decision records](architecture.md#decisions). Nothing runs from it yet.
+As of 2026-10-09, the hosting runs on a Mac, without the tunnel:
 
-The first demo exists and meets the contract: the Virtual Infrastructure Simulator, with its images published at version `0.1.0` ([The First Demo](hosting-contract.md#the-first-demo-as-the-example-to-follow)).
+- **The infrastructure's Compose project** (`infrastructure/`): Caddy, routing by hostname from each demo's snippet. `cloudflared` is not in it yet.
+- **The first demo** (`demos/virtual-infrastructure/`): the Virtual Infrastructure Simulator from its published images at version `0.1.0` ([The First Demo](hosting-contract.md#the-first-demo-as-the-example-to-follow)).
+- **The scripts** (`scripts/deploy`, `scripts/reset`), which find the demos by listing `demos/` ([Operations](operations.md)).
+
+Checked on a Mac: the demo opens on its hostname through Caddy, only its door is reachable, `/health` answers with the CORS header and stops answering `ok` when a back-end container stops, a write from outside is refused, the "About" dialog shows its links, and a reset under an open tab leaves the tab on the new system. A second, stand-in demo was added as one folder and ran beside the first with no other change.
 
 To be built, in this order:
 
-1. **The infrastructure and the first demo, on a Mac first:** the infrastructure's Compose project (Caddy, with `cloudflared` left out locally), `demos/virtual-infrastructure/`, the `deploy` script and the reset script.
-2. **The website:** the list of the demos and a page for each, with a demo shown as down from its health address.
-3. **The domain:** the tunnel and the hostnames.
-4. **The Pi:** Docker, this repository, its `.env`, the tunnel's credentials and the reset timer. Then the reset checked under an open tab.
+1. **The website:** the list of the demos and a page for each, with a demo shown as down from its health address.
+2. **The domain:** the tunnel (`cloudflared` in the infrastructure's Compose project) and the hostnames.
+3. **The Pi:** Docker, this repository, its `.env`, the tunnel's credentials and the reset timer. Then the reset checked under an open tab.
 
 ## Not Yet Checked
 
@@ -43,7 +46,7 @@ None of these is decided. Each needs discussion and a concrete use case before i
 
 ## Testing
 
-There are no tests yet, since there is no code. Documentation-only changes need none.
+There are no automated tests. A change to the infrastructure, a demo's folder or the scripts is checked by hand on a Mac: `scripts/deploy --no-pull` on the branch, then the checks under [The Deploy](adding-a-demo.md#the-deploy) against `http://<name>.localhost:8080`, and `scripts/reset`. Documentation-only changes need none.
 
 ## Branch Workflow
 

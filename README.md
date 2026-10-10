@@ -23,12 +23,64 @@ virtual-infrastructure.example.com     a demo, running on the Pi
 
 ## Status
 
-The design is written down and the implementation is starting. There is nothing to run yet, so the Quick Start comes with the first working piece.
+The hosting runs on a Mac with the first demo. The website, the domain with its tunnel, and the Raspberry Pi are still to come ([Current Baseline](docs/development.md#current-baseline)).
+
+## Quick Start
+
+The following steps take about 5 minutes on a Mac. You will have the first demo running in containers, behind the reverse proxy, on a hostname of its own.
+
+You need Docker with Compose (`docker compose version`) and Git (`git --version`).
+
+1. Clone the repository and go into it:
+
+   ```sh
+   git clone https://github.com/dmccuskey/demo-website.git
+   cd demo-website
+   ```
+
+2. Create `.env` for a Mac, with `localhost` as the domain and a write token of your own:
+
+   ```sh
+   printf 'DEMO_DOMAIN=localhost\nDATA_SERVICE_WRITE_TOKEN=%s\n' "$(openssl rand -hex 32)" > .env
+   ```
+
+   **Going further:** every value is described in [The `.env` File](docs/operations.md#the-env-file).
+
+3. Deploy. The first run downloads the images:
+
+   ```sh
+   scripts/deploy
+   ```
+
+   ```text
+   ==> Pulling the repository
+   ==> infrastructure
+   ==> virtual-infrastructure
+   ==> Reloading Caddy
+   Deployed.
+   ```
+
+   If it stops with `required variable DATA_SERVICE_WRITE_TOKEN is missing a value`, the token is missing from `.env`.
+
+4. Open <http://virtual-infrastructure.localhost:8080> in a browser. The dashboard shows one user and one server, and "About" opens the demo's dialog.
+
+5. Reset the demo, with the tab left open:
+
+   ```sh
+   scripts/reset
+   ```
+
+   The tab reconnects and shows a new system.
+
+   **Going further:** [Operations](docs/operations.md) has the rest: logs, one demo at a time, stopping everything.
+
+To update, run `scripts/deploy` again: it pulls the repository and the images.
 
 ## Documentation
 
 - [Architecture](docs/architecture.md): the parts, how a visitor reaches a demo, how a change gets out, the nightly reset
 - [Hosting Contract](docs/hosting-contract.md): what a demo provides to be hosted here
 - [Adding a Demo](docs/adding-a-demo.md): the folder, the DNS name and the deploy
+- [Operations](docs/operations.md): the `.env` file, the deploy and the reset
 
 Everything else, including the decision records and how the project is developed, is listed on the [documentation home](docs/README.md).

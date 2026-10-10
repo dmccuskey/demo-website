@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# Deploys what is in the repository to this machine: pulls the repository and the images, starts
+# the infrastructure and every demo, and reloads Caddy.
+#
+#   scripts/deploy             on the host
+#   scripts/deploy --no-pull   without `git pull`: what is checked out, e.g. a branch on a Mac
+set -euo pipefail
+
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+
+pull=true
+case "${1:-}" in
+    '') ;;
+    --no-pull) pull=false ;;
+    *)
+        echo "Usage: scripts/deploy [--no-pull]" >&2
+        exit 2
+        ;;
+esac
+
+if $pull; then
+    echo "==> Pulling the repository"
+    git -C "$root" pull --ff-only
+    # The rest runs from the scripts as pulled
+    exec "$root/scripts/deploy" --no-pull
+fi
+
+infrastructure="$root/infrastructure/compose.yaml"
+
+# The infrastructure first: it creates the network that every demo's door joins
+echo "==> infrastructure"
+compose "$infrastructure" pull
+compose "$infrastructure" up -d --remove-orphans
+
+failed=()
+while read -r file; do
+    name="$(demo_name "$file")"
+    echo "==> $name"
+    # One demo that fails does not stop the others
+    if ! { compose "$file" pull && compose "$file" up -d --remove-orphans; }; then
+        failed+=("$name")
+    fi
+done < <(demo_files)
+
+# Caddy reads the demos' snippets as it starts only: a new or changed one needs a reload
+echo "==> Reloading Caddy"
+compose "$infrastructure" exec -T caddy caddy reload --config /etc/caddy/Caddyfile
+
+if ((${#failed[@]})); then
+    echo "Failed: ${failed[*]}" >&2
+    exit 1
+fi
+echo "Deployed."

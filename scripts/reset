@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Resets every demo by recreating its containers: a demo's data is on a tmpfs, so it starts from
+# nothing. The infrastructure keeps running.
+#
+#   scripts/reset           every demo
+#   scripts/reset <name>    one demo
+set -euo pipefail
+
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+
+only="${1:-}"
+if [[ -n "$only" && ! -f "$root/demos/$only/compose.yaml" ]]; then
+    echo "No demo named '$only' in demos/." >&2
+    exit 2
+fi
+
+failed=()
+while read -r file; do
+    name="$(demo_name "$file")"
+    [[ -n "$only" && "$name" != "$only" ]] && continue
+    echo "==> $name"
+    # One demo that fails does not stop the others
+    if ! compose "$file" up -d --force-recreate; then
+        failed+=("$name")
+    fi
+done < <(demo_files)
+
+if ((${#failed[@]})); then
+    echo "Failed: ${failed[*]}" >&2
+    exit 1
+fi
+echo "Reset."

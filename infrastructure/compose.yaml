@@ -1,0 +1,26 @@
+# The infrastructure: what stands between a visitor and the demos. Started by scripts/deploy,
+# or by hand from the repository's root:
+#   docker compose --env-file .env -f infrastructure/compose.yaml up -d
+name: demo-infrastructure
+
+services:
+    # Routes each request by its hostname to a demo's door
+    caddy:
+        image: caddy:2.10-alpine
+        environment:
+            DEMO_DOMAIN: ${DEMO_DOMAIN:?}
+        volumes:
+            - ./Caddyfile:/etc/caddy/Caddyfile:ro
+            # Every demo's folder, for its Caddy snippet
+            - ../demos:/demos:ro
+        ports:
+            # For this machine only: the tunnel reaches Caddy over the Compose network, not here
+            - 127.0.0.1:${CADDY_PORT:-8080}:80
+        networks:
+            - demos
+        restart: unless-stopped
+
+networks:
+    # Shared with every demo's door, and with nothing else in a demo
+    demos:
+        name: demos

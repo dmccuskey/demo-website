@@ -4,7 +4,7 @@ How to host a demo on the Demo Website: one new folder in this repository, a DNS
 
 Nothing else in this repository changes for a new demo. If a demo seems to need a change elsewhere, that is a gap in the design: open an issue rather than special-casing the demo.
 
-The file names and the exact shape of each part are settled as the infrastructure and the website are built ([Current Baseline](development.md#current-baseline)). This page is updated with them.
+The first demo's folder, [`demos/virtual-infrastructure/`](../demos/virtual-infrastructure/), is the example for each file. The website is not built yet ([Current Baseline](development.md#current-baseline)), so the website entry's shape may still change with it.
 
 ## Before You Start: Check the Contract
 
@@ -24,14 +24,40 @@ The first demo is the example to follow for each point ([The First Demo](hosting
 
 ## The Folder
 
-Everything about a demo is in `demos/<name>/`, where `<name>` is the demo's name in its images and in its hostname (`virtual-infrastructure`). The folder has three parts.
+Everything about a demo is in `demos/<name>/`, where `<name>` is the demo's name in its images and in its hostname (`virtual-infrastructure`). The folder has three files:
+
+| File | What |
+|---|---|
+| `compose.yaml` | [the Compose file](#the-compose-file), which runs the demo |
+| `Caddyfile` | [the Caddy snippet](#the-caddy-snippet), which sends the demo's hostname to its door |
+| `demo.md` | [the website entry](#the-website-entry) |
 
 ### The Compose File
 
 `demos/<name>/compose.yaml` runs the demo from its published images. Start from the demo's own `compose.yaml` in its repository, and change it in these ways:
 
+- **The project's name is `demo-<name>`,** not `<name>`, which is the name in the demo's own `compose.yaml`. The two can then run on one machine.
+
+  ```yaml
+  name: demo-<name>
+  ```
+
 - **Images at a version,** not built locally and not `latest`: `ghcr.io/<owner>/<name>-<part>:0.1.0`. A new version of the demo is a change to this number, so this repository's history records what ran when.
-- **No published port.** Caddy reaches the door over a network shared with the infrastructure. Nothing else in the demo joins that network.
+- **No published port.** Caddy reaches the door over the Docker network `demos`, which the infrastructure creates. The door joins it under the demo's name, and keeps its place on the demo's own network. Nothing else in the demo joins it.
+
+  ```yaml
+  services:
+      web:
+          networks:
+              default:
+              demos:
+                  aliases:
+                      - <name>
+
+  networks:
+      demos:
+          external: true
+  ```
 - **The data on a `tmpfs`,** so that recreating the containers resets the demo.
 - **The write token, required.** With the variable unset a demo lets every client write, so a missing line in `.env` would open it without any error. Write it so that Compose refuses to start without it, on both the data service and the live server:
 
@@ -53,17 +79,19 @@ No hostname is written out in the file. The domain comes from `DEMO_DOMAIN`, and
 
 ### The Caddy Snippet
 
-A short snippet that sends the demo's hostname to its door. The infrastructure's main Caddyfile imports every demo's snippet, so the main file does not change:
+`demos/<name>/Caddyfile` sends the demo's hostname to its door. The infrastructure's main Caddyfile imports every demo's `Caddyfile`, so the main file does not change:
 
 ```caddyfile
-<name>.{$DEMO_DOMAIN} {
-	reverse_proxy <door's container>:<door's port>
+http://<name>.{$DEMO_DOMAIN} {
+	reverse_proxy <name>:<door's port>
 }
 ```
 
+The address starts with `http://`, since TLS ends before a request reaches Caddy. The name after `reverse_proxy` is the door's alias on the network `demos`.
+
 ### The Website Entry
 
-The demo's entry for the website: its title, a description, a picture, and its links. The website builds the demo's line in the list and the demo's page from it, and reads the demo's health address at `https://<name>.<domain>/health`.
+`demos/<name>/demo.md` is the demo's entry for the website: a `title`, a one-line `summary` and the `source` address at its top, and the description below them. A picture comes with the website. The website builds the demo's line in the list and the demo's page from it, and reads the demo's health address at `https://<name>.<domain>/health`.
 
 Check the picture for identifying details before committing it.
 
@@ -73,7 +101,9 @@ The demo needs the hostname `<name>.<domain>`, one level under the domain ([ADR 
 
 ## The Deploy
 
-Merge the folder to `main` and push. The static host rebuilds the website. On the Pi, run the `deploy` script, which pulls the repository and the images and starts the demo ([How a Change Gets Out](architecture.md#how-a-change-gets-out)).
+Merge the folder to `main` and push. The static host rebuilds the website. On the Pi, run `scripts/deploy`, which pulls the repository and the images, starts the demo, and reloads Caddy ([The Deploy](operations.md#the-deploy)). The scripts find the demo by its folder: nothing lists the demos.
+
+To try the folder on a Mac first, run `scripts/deploy --no-pull` on its branch and open `http://<name>.localhost:8080`.
 
 Then check, from outside the home network:
 
