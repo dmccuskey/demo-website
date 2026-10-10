@@ -1,0 +1,65 @@
+# The Virtual Infrastructure Simulator, from its published images. Started by scripts/deploy,
+# or by hand from the repository's root:
+#   docker compose --env-file .env -f demos/virtual-infrastructure/compose.yaml up -d
+#
+# The records are on a tmpfs: recreating the containers starts the demo from nothing.
+name: demo-virtual-infrastructure
+
+services:
+    data-service:
+        image: ghcr.io/dmccuskey/virtual-infrastructure-data-service:0.1.0
+        environment:
+            # Required: with it unset, every client may write
+            DATA_SERVICE_WRITE_TOKEN: ${DATA_SERVICE_WRITE_TOKEN:?}
+        tmpfs:
+            - /data:uid=1000,gid=1000
+        healthcheck:
+            test: ['CMD', 'bun', '-e', "process.exit((await fetch('http://localhost:3030/health')).ok ? 0 : 1)"]
+            interval: 30s
+            timeout: 5s
+            start_period: 20s
+            start_interval: 1s
+        restart: unless-stopped
+
+    live-server:
+        image: ghcr.io/dmccuskey/virtual-infrastructure-live-server:0.1.0
+        environment:
+            DATA_SERVICE_WRITE_TOKEN: ${DATA_SERVICE_WRITE_TOKEN:?}
+        # It fails its start without the data service
+        depends_on:
+            data-service:
+                condition: service_healthy
+        healthcheck:
+            test: ['CMD', 'bun', '-e', "process.exit((await fetch('http://localhost:3031/health')).ok ? 0 : 1)"]
+            interval: 30s
+            timeout: 5s
+            start_period: 20s
+            start_interval: 1s
+        restart: unless-stopped
+
+    # The door: the only one of the three that Caddy reaches, on port 3032
+    web:
+        image: ghcr.io/dmccuskey/virtual-infrastructure-web:0.1.0
+        environment:
+            # The website's origin, whose page reads /health
+            HEALTH_ALLOW_ORIGIN: https://demo.${DEMO_DOMAIN:?}
+            # The links of the "About" dialog
+            ABOUT_LINK_1_LABEL: More about this demo
+            ABOUT_LINK_1_URL: https://demo.${DEMO_DOMAIN:?}/demos/virtual-infrastructure/
+            ABOUT_LINK_2_LABEL: Source code
+            ABOUT_LINK_2_URL: https://github.com/dmccuskey/live-system/tree/main/examples/virtual-infrastructure
+        networks:
+            default:
+            demos:
+                # The name Caddy reaches the door by: the demo's name
+                aliases:
+                    - virtual-infrastructure
+        depends_on:
+            live-server:
+                condition: service_healthy
+        restart: unless-stopped
+
+networks:
+    # The infrastructure's network, which only the door joins
+    demos:
+        external: true

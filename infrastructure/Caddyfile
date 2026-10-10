@@ -1,0 +1,13 @@
+# The main Caddyfile. It names no demo: each demo's folder has a snippet of its own, and adding
+# a demo does not change this file.
+{
+	# TLS ends before a request reaches this host, so Caddy speaks plain HTTP only
+	auto_https off
+}
+
+import /demos/*/Caddyfile
+
+# A hostname that no demo answers to
+http:// {
+	respond "No demo at this address." 404
+}
