@@ -29,7 +29,9 @@ A visitor opens the website, picks a demo, and follows a link to the demo's own 
 
 A static site: the list of the demos, and a page for each. It is built and served by a static host, not by the Pi ([ADR 004](decisions/004-static-website-hosted-elsewhere.md)). The Pi never receives the built site.
 
-For each demo, the page in the visitor's browser reads the demo's [health address](hosting-contract.md#4-a-health-address) and shows the demo as up or down.
+Its source is in `website/`. Eleventy builds it from each demo's entry, `demos/<name>/demo.md`, and Cloudflare Pages builds and serves it ([ADR 007](decisions/007-eleventy-on-cloudflare-pages.md)). A demo's page is at `/demos/<name>/`.
+
+For each demo, the page in the visitor's browser reads the demo's [health address](hosting-contract.md#4-a-health-address) and shows the demo as up or down. It reads it when the page opens, and every 30 seconds while the page is looked at. A demo that does not answer within 5 seconds is shown as down.
 
 ### The Infrastructure
 
@@ -99,3 +101,4 @@ A browser tab that is open across the reset loses its connection, reconnects, an
 | [004](decisions/004-static-website-hosted-elsewhere.md) | The website is static and hosted elsewhere |
 | [005](decisions/005-hostname-per-demo.md) | A hostname per demo, one level under the domain, from variables |
 | [006](decisions/006-reset-by-recreating-containers.md) | A reset by recreating containers, with the data on a `tmpfs` |
+| [007](decisions/007-eleventy-on-cloudflare-pages.md) | The website is built with Eleventy and served by Cloudflare Pages |

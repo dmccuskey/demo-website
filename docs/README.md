@@ -5,7 +5,7 @@ New to the Demo Website? Start with the [main README](../README.md), which says 
 ## Use
 
 - [Adding a Demo](adding-a-demo.md): hosting a demo here, as one folder, a DNS name and a deploy
-- [Operations](operations.md): the `.env` file, the deploy, the reset, and looking at what runs
+- [Operations](operations.md): the `.env` file, the deploy, the reset, the website's build, and looking at what runs
 - [Hosting Contract](hosting-contract.md): what a demo provides to be hosted, point by point, with the names that are the same in every demo
 
 ## Internals
@@ -39,6 +39,12 @@ demo-website/
 │       ├── compose.yaml      # the demo, from its published images
 │       ├── Caddyfile         # the demo's hostname to its door
 │       └── demo.md           # the entry for the website
+├── website/                  # the static site's source, built with Eleventy
+│   ├── pages/                # the list, and the page made once per demo
+│   ├── _includes/            # the layout
+│   ├── _data/ and lib/       # the demos, read from demos/, and their addresses
+│   ├── assets/               # the stylesheet, and the script that shows up or down
+│   └── eleventy.config.js
 ├── scripts/
 │   ├── deploy                # pull, start everything, reload Caddy
 │   ├── reset                 # recreate every demo's containers
@@ -53,6 +59,5 @@ What the design adds, as it is built:
 
 ```text
 demo-website/
-├── <the website>             # the static site's source
 └── infrastructure/           # cloudflared, beside Caddy
 ```

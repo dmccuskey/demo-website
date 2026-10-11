@@ -24,4 +24,4 @@ The site's build takes the domain as a variable, as everything else does ([ADR 0
 - The website is there when the Pi is not, and can show a demo as down.
 - The website and a demo are on different hostnames, so reading a demo's health is a cross-origin request. Every demo's door must allow the website's origin, `HEALTH_ALLOW_ORIGIN`.
 - A change gets out in two halves: the static host rebuilds the site, and the Pi pulls ([How a Change Gets Out](../architecture.md#how-a-change-gets-out)).
-- Which static host is not decided here ([Possible Future Changes](../development.md#possible-future-changes)).
+- Which static host is decided in [ADR 007](007-eleventy-on-cloudflare-pages.md).

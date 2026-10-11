@@ -96,6 +96,50 @@ On the host a timer runs it each night. The timer is not set up yet ([Current Ba
 
 Reset a demo as a whole, with the script. Restarting one of its containers alone can leave the demo's parts out of step: a data service that restarts alone has lost its records, while its live server still runs on them.
 
+## The Website
+
+The website's source is in `website/`. Its build needs Node 22 or later, and the domain: it reads `DEMO_DOMAIN` from its environment, or else from the repository's `.env`, and fails without it.
+
+```sh
+cd website
+npm ci
+npm start        # builds, serves on http://localhost:8081, rebuilds on a change
+npm run build    # builds once, into website/_site/
+```
+
+With `localhost` as the domain, the built site points at the demos behind Caddy on the same machine (`http://<name>.localhost:8080`, or the port in `CADDY_PORT`). With any other domain it points at `https://<name>.<domain>`.
+
+On a Mac a running demo is still shown as down. A demo allows its health address to be read from the website's real origin only, `https://demo.<domain>` ([contract point 4](hosting-contract.md#4-a-health-address)), and the site on your machine has another. To see it as up, start the demo's door with the origin of the site on your machine, from a Compose file of your own that is not committed:
+
+```yaml
+# website.local.yaml
+services:
+    web:
+        environment:
+            HEALTH_ALLOW_ORIGIN: http://localhost:8081
+```
+
+```sh
+docker compose --env-file .env -f demos/<name>/compose.yaml -f website.local.yaml up -d
+```
+
+Run `scripts/deploy --no-pull` to put the door back.
+
+### On Cloudflare Pages
+
+Cloudflare Pages builds and serves the website on a push to `main` ([ADR 007](decisions/007-eleventy-on-cloudflare-pages.md)). Nothing of it is in the repository: these are the settings of the Pages project, in the Cloudflare account.
+
+| Setting | Value |
+|---|---|
+| Production branch | `main` |
+| Root directory | `website` |
+| Build command | `npm run build` |
+| Build output directory | `_site` |
+| Environment variable `DEMO_DOMAIN` | the domain |
+| Custom domain | `demo.<domain>` |
+
+The Node version comes from `website/.node-version`.
+
 ## Removing a Demo
 
 Stop the demo before removing its folder, since the scripts only know the demos that have one:
