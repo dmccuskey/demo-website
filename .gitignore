@@ -4,3 +4,7 @@
 *.local.*
 
 .DS_Store
+
+# The website: its dependencies and its built output
+node_modules/
+website/_site/

@@ -16,14 +16,16 @@ As of 2026-10-09, the hosting runs on a Mac, without the tunnel:
 - **The infrastructure's Compose project** (`infrastructure/`): Caddy, routing by hostname from each demo's snippet. `cloudflared` is not in it yet.
 - **The first demo** (`demos/virtual-infrastructure/`): the Virtual Infrastructure Simulator from its published images at version `0.1.0` ([The First Demo](hosting-contract.md#the-first-demo-as-the-example-to-follow)).
 - **The scripts** (`scripts/deploy`, `scripts/reset`), which find the demos by listing `demos/` ([Operations](operations.md)).
+- **The website's source** (`website/`): the list of the demos and a page for each, built with Eleventy ([ADR 007](decisions/007-eleventy-on-cloudflare-pages.md)). It is not on its static host yet: that comes with the domain.
 
 Checked on a Mac: the demo opens on its hostname through Caddy, only its door is reachable, `/health` answers with the CORS header and stops answering `ok` when a back-end container stops, a write from outside is refused, the "About" dialog shows its links, and a reset under an open tab leaves the tab on the new system. A second, stand-in demo was added as one folder and ran beside the first with no other change.
 
+Checked for the website, also on a Mac: it builds from a clean copy of the repository, the build fails without `DEMO_DOMAIN`, and the built site shows the demo as up, and as down once its live server is stopped.
+
 To be built, in this order:
 
-1. **The website:** the list of the demos and a page for each, with a demo shown as down from its health address.
-2. **The domain:** the tunnel (`cloudflared` in the infrastructure's Compose project) and the hostnames.
-3. **The Pi:** Docker, this repository, its `.env`, the tunnel's credentials and the reset timer. Then the reset checked under an open tab.
+1. **The domain:** the tunnel (`cloudflared` in the infrastructure's Compose project), the hostnames, and the website on Cloudflare Pages.
+2. **The Pi:** Docker, this repository, its `.env`, the tunnel's credentials and the reset timer. Then the reset checked under an open tab.
 
 ## Not Yet Checked
 
@@ -38,7 +40,6 @@ The design rests on these, and each is to be checked before the step that needs 
 
 None of these is decided. Each needs discussion and a concrete use case before it is worked on.
 
-- **Which static host serves the website:** GitHub Pages or Cloudflare Pages ([ADR 004](decisions/004-static-website-hosted-elsewhere.md)). One thing to find out first: whether GitHub Pages takes a custom domain without a `CNAME` file in the repository, which would commit the hostname.
 - **A deploy timer:** a timer on the Pi that checks the repository every few minutes and runs the `deploy` script when there is something new, in place of running it by hand over SSH.
 - **A data viewer for each demo:** `feathers-gui` pointed at a demo's data service, linked from the demo's page and its "About" dialog. The data service is read-only from outside ([contract point 6](hosting-contract.md#6-a-data-service-read-only-from-outside)), which makes this safe.
 - **A build ID** ([contract point 8](hosting-contract.md#8-a-build-id-optional)), so that a tab running an old build of a demo's web app reloads once a new build is in place.
@@ -47,6 +48,8 @@ None of these is decided. Each needs discussion and a concrete use case before i
 ## Testing
 
 There are no automated tests. A change to the infrastructure, a demo's folder or the scripts is checked by hand on a Mac: `scripts/deploy --no-pull` on the branch, then the checks under [The Deploy](adding-a-demo.md#the-deploy) against `http://<name>.localhost:8080`, and `scripts/reset`. Documentation-only changes need none.
+
+A change to the website is checked in a browser, against a demo running on the same Mac ([The Website](operations.md#the-website)): the list, the demo's page, and the demo shown as up, then as down with one of its back-end containers stopped.
 
 ## Branch Workflow
 

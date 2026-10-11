@@ -23,7 +23,7 @@ virtual-infrastructure.example.com     a demo, running on the Pi
 
 ## Status
 
-The hosting runs on a Mac with the first demo. The website, the domain with its tunnel, and the Raspberry Pi are still to come ([Current Baseline](docs/development.md#current-baseline)).
+The hosting runs on a Mac with the first demo, and the website builds from the demos' entries. The domain with its tunnel and the website's static host, and the Raspberry Pi, are still to come ([Current Baseline](docs/development.md#current-baseline)).
 
 ## Quick Start
 
@@ -73,6 +73,18 @@ You need Docker with Compose (`docker compose version`) and Git (`git --version`
    The tab reconnects and shows a new system.
 
    **Going further:** [Operations](docs/operations.md) has the rest: logs, one demo at a time, stopping everything.
+
+6. Optional: see the website, the list of the demos with a page for each. It needs Node 22 or later (`node --version`):
+
+   ```sh
+   cd website
+   npm ci
+   npm start
+   ```
+
+   Open <http://localhost:8081>. The demo is shown as "Down" there even while it runs: a demo lets only the website's real address read its state.
+
+   **Going further:** [The Website](docs/operations.md#the-website) shows how to see it as up on your machine.
 
 To update, run `scripts/deploy` again: it pulls the repository and the images.
 

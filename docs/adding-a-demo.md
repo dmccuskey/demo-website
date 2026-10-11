@@ -4,7 +4,7 @@ How to host a demo on the Demo Website: one new folder in this repository, a DNS
 
 Nothing else in this repository changes for a new demo. If a demo seems to need a change elsewhere, that is a gap in the design: open an issue rather than special-casing the demo.
 
-The first demo's folder, [`demos/virtual-infrastructure/`](../demos/virtual-infrastructure/), is the example for each file. The website is not built yet ([Current Baseline](development.md#current-baseline)), so the website entry's shape may still change with it.
+The first demo's folder, [`demos/virtual-infrastructure/`](../demos/virtual-infrastructure/), is the example for each file.
 
 ## Before You Start: Check the Contract
 
@@ -31,6 +31,7 @@ Everything about a demo is in `demos/<name>/`, where `<name>` is the demo's name
 | `compose.yaml` | [the Compose file](#the-compose-file), which runs the demo |
 | `Caddyfile` | [the Caddy snippet](#the-caddy-snippet), which sends the demo's hostname to its door |
 | `demo.md` | [the website entry](#the-website-entry) |
+| `picture.png` | optional: the demo's picture, for the website entry |
 
 ### The Compose File
 
@@ -91,9 +92,23 @@ The address starts with `http://`, since TLS ends before a request reaches Caddy
 
 ### The Website Entry
 
-`demos/<name>/demo.md` is the demo's entry for the website: a `title`, a one-line `summary` and the `source` address at its top, and the description below them. A picture comes with the website. The website builds the demo's line in the list and the demo's page from it, and reads the demo's health address at `https://<name>.<domain>/health`.
+`demos/<name>/demo.md` is the demo's entry for the website: a `title`, a one-line `summary` and the `source` address at its top, and the description below them, in Markdown. All three are required: the website's build fails without one.
 
-Check the picture for identifying details before committing it.
+```markdown
+---
+title: <the demo's title>
+summary: <one line, shown in the list>
+source: https://github.com/<owner>/<repository>
+---
+
+<the description, shown on the demo's page>
+```
+
+The website builds the demo's line in the list and the demo's page, `/demos/<name>/`, from it, and reads the demo's health address at `https://<name>.<domain>/health`. The page's address is the one the demo's "About" dialog links back to, from its `compose.yaml`.
+
+A picture is optional: `picture.png` in the demo's folder (or `.jpg`, `.webp`, `.svg`) is shown in the list and on the demo's page. Check the picture for identifying details before committing it.
+
+To see the entry, build the website on your machine ([The Website](operations.md#the-website)).
 
 ## The DNS Name
 

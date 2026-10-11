@@ -1,0 +1,24 @@
+---
+layout: layout.njk
+pagination:
+    data: demos
+    size: 1
+    alias: demo
+permalink: "{{ demo.page }}"
+eleventyComputed:
+    title: "{{ demo.title }}"
+    summary: "{{ demo.summary }}"
+---
+<h1>{{ demo.title }}</h1>
+{% include "health.njk" %}
+
+{%- if demo.picture %}
+<img class="picture" src="{{ demo.page }}{{ demo.picture }}" alt="The {{ demo.title }}'s dashboard" />
+{%- endif %}
+
+{{ demo.description | safe }}
+
+<ul class="links">
+    <li><a class="open" href="{{ demo.address }}/">Open the demo</a></li>
+    <li><a href="{{ demo.source }}">Source code</a></li>
+</ul>

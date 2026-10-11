@@ -1,0 +1,19 @@
+---
+layout: layout.njk
+summary: Small, complete systems to use in the browser.
+---
+<h1>Demos</h1>
+<p class="lead">Small, complete systems to use in the browser. Each one runs on a server of its own, and starts over each night.</p>
+
+<ul class="demos">
+    {%- for demo in demos %}
+    <li>
+        {%- if demo.picture %}
+        <a href="{{ demo.page }}" tabindex="-1" aria-hidden="true"><img src="{{ demo.page }}{{ demo.picture }}" alt="" /></a>
+        {%- endif %}
+        <h2><a href="{{ demo.page }}">{{ demo.title }}</a></h2>
+        {% include "health.njk" %}
+        <p>{{ demo.summary }}</p>
+    </li>
+    {%- endfor %}
+</ul>
