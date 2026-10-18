@@ -30,6 +30,8 @@ cp .env.example .env
 | `DEMO_DOMAIN` | The domain every hostname is under: a demo is `<name>.<domain>`. On a Mac, `localhost` |
 | `DATA_SERVICE_WRITE_TOKEN` | The token a demo's live server presents to write to its data service ([contract point 6](hosting-contract.md#6-a-data-service-read-only-from-outside)). Any value, kept secret: `openssl rand -hex 32` makes one |
 | `CADDY_PORT` | Optional. The port on this machine that Caddy listens on, on `127.0.0.1` only. Default `8080` |
+| `COMPOSE_PROFILES` | `tunnel` on the host, which starts `cloudflared` with the infrastructure. Left out on a Mac without a tunnel |
+| `TUNNEL_TOKEN` | With the profile `tunnel`: the tunnel's token ([The Tunnel](#the-tunnel)). A secret |
 
 The scripts stop without the file. A demo does not start without the token: Compose refuses, and says which variable is missing.
 
@@ -95,6 +97,27 @@ It recreates the containers of every demo, or of the one demo named. A demo's da
 On the host a timer runs it each night. The timer is not set up yet ([Current Baseline](development.md#current-baseline)).
 
 Reset a demo as a whole, with the script. Restarting one of its containers alone can leave the demo's parts out of step: a data service that restarts alone has lost its records, while its live server still runs on them.
+
+## The Tunnel
+
+The tunnel connects the host to Cloudflare, outbound ([ADR 002](decisions/002-tunnel-never-a-forwarded-port.md)). It is `cloudflared` in the infrastructure's Compose project, started only with the profile `tunnel`. It reaches Caddy, and no demo: every request goes to Caddy, which routes it by its hostname.
+
+The tunnel itself is set up in the Cloudflare account, which is also where its hostnames are. Nothing of it is in the repository:
+
+1. In Cloudflare Zero Trust, under Networks, create a tunnel of the type Cloudflared. Name it for the host.
+2. Copy its token, the long value after `--token` in the install command it shows, into the host's `.env` as `TUNNEL_TOKEN`, with `COMPOSE_PROFILES=tunnel`. Skip installing `cloudflared` the way the page shows: the Compose project runs it.
+3. Add a route for each demo, a "published application" (once called a public hostname): the hostname is `<name>.<domain>`, and the service is `http://caddy:80`. Cloudflare creates the DNS record for it.
+4. Run `scripts/deploy`. The tunnel shows as healthy in the account.
+
+Then from any machine:
+
+```sh
+curl https://<name>.<domain>/health
+```
+
+The host's `.env` must have the real domain in `DEMO_DOMAIN`: Caddy routes by it, and a request for a hostname it does not know gets `No demo at this address.`
+
+One tunnel serves one host. To try the tunnel from a Mac before the host has it, give the Mac's `.env` the real domain and the token, run `scripts/deploy --no-pull`, and take both out again after: while the tunnel runs on the Mac, the demos are served from the Mac.
 
 ## The Website
 

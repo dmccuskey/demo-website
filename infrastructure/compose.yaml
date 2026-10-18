@@ -14,10 +14,28 @@ services:
             # Every demo's folder, for its Caddy snippet
             - ../demos:/demos:ro
         ports:
-            # For this machine only: the tunnel reaches Caddy over the Compose network, not here
+            # For this machine only: the tunnel reaches Caddy over the default network, not here
             - 127.0.0.1:${CADDY_PORT:-8080}:80
         networks:
+            - default
             - demos
+        restart: unless-stopped
+
+    # The tunnel's client: connects outbound to Cloudflare, and sends every request to Caddy. Its
+    # hostnames are set on the tunnel, in the Cloudflare account. Started only with the profile
+    # `tunnel`, which a Mac without a tunnel leaves out
+    cloudflared:
+        image: cloudflare/cloudflared:2026.10.1
+        profiles:
+            - tunnel
+        command: tunnel --no-autoupdate run
+        environment:
+            TUNNEL_TOKEN: ${TUNNEL_TOKEN:-}
+        # Only the default network: it reaches Caddy, and no demo
+        networks:
+            - default
+        depends_on:
+            - caddy
         restart: unless-stopped
 
 networks:

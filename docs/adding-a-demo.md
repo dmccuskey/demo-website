@@ -112,7 +112,7 @@ To see the entry, build the website on your machine ([The Website](operations.md
 
 ## The DNS Name
 
-The demo needs the hostname `<name>.<domain>`, one level under the domain ([ADR 005](decisions/005-hostname-per-demo.md)), pointing at the tunnel. This is a step in the DNS provider's account, not in this repository.
+The demo needs the hostname `<name>.<domain>`, one level under the domain ([ADR 005](decisions/005-hostname-per-demo.md)), pointing at the tunnel. It is a route on the tunnel, a "published application" in the Cloudflare account, with `http://caddy:80` as its service; Cloudflare creates the DNS record ([The Tunnel](operations.md#the-tunnel)). Nothing in this repository changes for it.
 
 ## The Deploy
 
