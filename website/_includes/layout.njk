@@ -3,14 +3,14 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>{% if title %}{{ title }} · {% endif %}Demos</title>
+        <title>{% if title %}{{ title }} · {% endif %}{{ site.name }}</title>
         {% if summary %}<meta name="description" content="{{ summary }}" />{% endif %}
         <link rel="stylesheet" href="/assets/site.css" />
         <script type="module" src="/assets/health.js"></script>
     </head>
     <body>
         <header>
-            <a href="/">Demos</a>
+            <a href="/">{{ site.name }}</a>
         </header>
         <main>
             {{ content | safe }}
