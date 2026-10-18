@@ -11,12 +11,13 @@ How the Demo Website is developed: the rules that hold throughout, what is built
 
 ## Current Baseline
 
-As of 2026-10-18, the hosting runs on a Mac, reached through the tunnel; the Pi is still to come:
+As of 2026-10-18, the hosting runs on the Pi, reached through the tunnel ([Installation](installation.md)):
 
 - **The infrastructure's Compose project** (`infrastructure/`): Caddy, routing by hostname from each demo's snippet, and `cloudflared`, the tunnel's client, started by the profile `tunnel` ([The Tunnel](operations.md#the-tunnel)).
 - **The first demo** (`demos/virtual-infrastructure/`): the Virtual Infrastructure Simulator from its published images at version `0.1.0` ([The First Demo](hosting-contract.md#the-first-demo-as-the-example-to-follow)).
 - **The scripts** (`scripts/deploy`, `scripts/reset`), which find the demos by listing `demos/` ([Operations](operations.md)).
-- **The website's source** (`website/`): the list of the demos and a page for each, built with Eleventy ([ADR 007](decisions/007-eleventy-on-cloudflare-pages.md))., built and served by Cloudflare Pages on the domain's `demo.<domain>`.
+- **The nightly reset** (`host/systemd/`): a systemd user timer on the Pi that runs `scripts/reset` at 04:00 ([The Nightly Reset](installation.md#4-the-nightly-reset)).
+- **The website's source** (`website/`): the list of the demos and a page for each, built with Eleventy and served by Cloudflare Pages on `demo.<domain>` ([ADR 007](decisions/007-eleventy-on-cloudflare-pages.md)).
 
 Checked on a Mac: the demo opens on its hostname through Caddy, only its door is reachable, `/health` answers with the CORS header and stops answering `ok` when a back-end container stops, a write from outside is refused, the "About" dialog shows its links, and a reset under an open tab leaves the tab on the new system. A second, stand-in demo was added as one folder and ran beside the first with no other change.
 
@@ -24,17 +25,13 @@ Checked for the website, also on a Mac: it builds from a clean copy of the repos
 
 Checked through the tunnel, from outside: the demo opens at `https://<name>.<domain>`, and its `/health` answers `ok` with the website's origin allowed.
 
-To be built:
-
-1. **The Pi:** Docker, this repository, its `.env`, the tunnel's credentials and the reset timer. Then the reset checked under an open tab.
+Checked on the Pi: the deploy, and the reset as the timer runs it. With the demo stopped, the website showed it as down; after the reset, open tabs of the demo and of the website came back by themselves, the demo's on a new system. Docker publishes no port but Caddy's, on `127.0.0.1`, and nothing connects out but the tunnel's client.
 
 ## Not Yet Checked
 
 The design rests on these, and each is to be checked before the step that needs it:
 
-- `cloudflared` as a container on Linux ARM64.
-- A demo's runtime on the Pi 4. The first demo runs on Bun, whose documentation says Linux ARM64 is supported without naming the Pi.
-- The reset under an open tab on the Pi itself ([ADR 006](decisions/006-reset-by-recreating-containers.md)); it was checked on a laptop.
+- Nothing at present.
 
 ## Possible Future Changes
 

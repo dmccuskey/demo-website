@@ -23,7 +23,7 @@ virtual-infrastructure.example.com     a demo, running on the Pi
 
 ## Status
 
-The website is on its static host, and the first demo is reached through the tunnel, from a Mac for now. The Raspberry Pi is still to come ([Current Baseline](docs/development.md#current-baseline)).
+The website is on its static host, and the first demo runs on the Raspberry Pi, reached through the tunnel and reset each night ([Current Baseline](docs/development.md#current-baseline)).
 
 ## Quick Start
 
@@ -93,6 +93,7 @@ To update, run `scripts/deploy` again: it pulls the repository and the images.
 - [Architecture](docs/architecture.md): the parts, how a visitor reaches a demo, how a change gets out, the nightly reset
 - [Hosting Contract](docs/hosting-contract.md): what a demo provides to be hosted here
 - [Adding a Demo](docs/adding-a-demo.md): the folder, the DNS name and the deploy
+- [Installation](docs/installation.md): setting up the host, a Raspberry Pi
 - [Operations](docs/operations.md): the `.env` file, the deploy and the reset
 
 Everything else, including the decision records and how the project is developed, is listed on the [documentation home](docs/README.md).
