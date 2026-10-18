@@ -9,6 +9,9 @@ eleventyComputed:
     title: "{{ demo.title }}"
     summary: "{{ demo.summary }}"
 ---
+<nav class="breadcrumbs" aria-label="Breadcrumbs">
+    <a href="/">Demos</a> <span aria-hidden="true">›</span> <span aria-current="page">{{ demo.title }}</span>
+</nav>
 <h1>{{ demo.title }}</h1>
 {% include "health.njk" %}
 
@@ -19,6 +22,6 @@ eleventyComputed:
 {{ demo.description | safe }}
 
 <ul class="links">
-    <li><a class="open" href="{{ demo.address }}/">Open the demo</a></li>
+    <li><a class="open" href="{{ demo.address }}/" target="_blank" rel="noopener">Open the demo</a></li>
     <li><a href="{{ demo.source }}">Source code</a></li>
 </ul>
