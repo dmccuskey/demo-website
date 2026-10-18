@@ -23,7 +23,7 @@ virtual-infrastructure.example.com     a demo, running on the Pi
 
 ## Status
 
-The hosting runs on a Mac with the first demo, and the website builds from the demos' entries. The domain with its tunnel and the website's static host, and the Raspberry Pi, are still to come ([Current Baseline](docs/development.md#current-baseline)).
+The website is on its static host, and the first demo is reached through the tunnel, from a Mac for now. The Raspberry Pi is still to come ([Current Baseline](docs/development.md#current-baseline)).
 
 ## Quick Start
 

@@ -11,27 +11,27 @@ How the Demo Website is developed: the rules that hold throughout, what is built
 
 ## Current Baseline
 
-As of 2026-10-09, the hosting runs on a Mac, without the tunnel:
+As of 2026-10-18, the hosting runs on a Mac, reached through the tunnel; the Pi is still to come:
 
-- **The infrastructure's Compose project** (`infrastructure/`): Caddy, routing by hostname from each demo's snippet. `cloudflared` is not in it yet.
+- **The infrastructure's Compose project** (`infrastructure/`): Caddy, routing by hostname from each demo's snippet, and `cloudflared`, the tunnel's client, started by the profile `tunnel` ([The Tunnel](operations.md#the-tunnel)).
 - **The first demo** (`demos/virtual-infrastructure/`): the Virtual Infrastructure Simulator from its published images at version `0.1.0` ([The First Demo](hosting-contract.md#the-first-demo-as-the-example-to-follow)).
 - **The scripts** (`scripts/deploy`, `scripts/reset`), which find the demos by listing `demos/` ([Operations](operations.md)).
-- **The website's source** (`website/`): the list of the demos and a page for each, built with Eleventy ([ADR 007](decisions/007-eleventy-on-cloudflare-pages.md)). It is not on its static host yet: that comes with the domain.
+- **The website's source** (`website/`): the list of the demos and a page for each, built with Eleventy ([ADR 007](decisions/007-eleventy-on-cloudflare-pages.md))., built and served by Cloudflare Pages on the domain's `demo.<domain>`.
 
 Checked on a Mac: the demo opens on its hostname through Caddy, only its door is reachable, `/health` answers with the CORS header and stops answering `ok` when a back-end container stops, a write from outside is refused, the "About" dialog shows its links, and a reset under an open tab leaves the tab on the new system. A second, stand-in demo was added as one folder and ran beside the first with no other change.
 
 Checked for the website, also on a Mac: it builds from a clean copy of the repository, the build fails without `DEMO_DOMAIN`, and the built site shows the demo as up, and as down once its live server is stopped.
 
-To be built, in this order:
+Checked through the tunnel, from outside: the demo opens at `https://<name>.<domain>`, and its `/health` answers `ok` with the website's origin allowed.
 
-1. **The domain:** the tunnel (`cloudflared` in the infrastructure's Compose project), the hostnames, and the website on Cloudflare Pages.
-2. **The Pi:** Docker, this repository, its `.env`, the tunnel's credentials and the reset timer. Then the reset checked under an open tab.
+To be built:
+
+1. **The Pi:** Docker, this repository, its `.env`, the tunnel's credentials and the reset timer. Then the reset checked under an open tab.
 
 ## Not Yet Checked
 
 The design rests on these, and each is to be checked before the step that needs it:
 
-- That Cloudflare's free plan covers the tunnel and the DNS as needed.
 - `cloudflared` as a container on Linux ARM64.
 - A demo's runtime on the Pi 4. The first demo runs on Bun, whose documentation says Linux ARM64 is supported without naming the Pi.
 - The reset under an open tab on the Pi itself ([ADR 006](decisions/006-reset-by-recreating-containers.md)); it was checked on a laptop.
