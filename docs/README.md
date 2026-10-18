@@ -2,6 +2,10 @@
 
 New to the Demo Website? Start with the [main README](../README.md), which says what it is and is not. The [Quick Start](../README.md#quick-start) there runs the hosting and the first demo on a Mac.
 
+## Start
+
+- [Installation](installation.md): setting up the host, a Raspberry Pi: Docker, the repository and `.env`, the deploy, the nightly reset
+
 ## Use
 
 - [Adding a Demo](adding-a-demo.md): hosting a demo here, as one folder, a DNS name and a deploy
@@ -19,12 +23,13 @@ New to the Demo Website? Start with the [main README](../README.md), which says 
 
 ## Project Structure
 
-What is in the repository now:
+What is in the repository:
 
 ```text
 demo-website/
 ├── docs/
 │   ├── README.md             # this page
+│   ├── installation.md
 │   ├── architecture.md
 │   ├── hosting-contract.md
 │   ├── adding-a-demo.md
@@ -32,7 +37,7 @@ demo-website/
 │   ├── development.md
 │   └── decisions/            # ADRs
 ├── infrastructure/
-│   ├── compose.yaml          # the infrastructure's Compose project: Caddy
+│   ├── compose.yaml          # the infrastructure's Compose project: Caddy, and cloudflared
 │   └── Caddyfile             # the main Caddyfile, which imports every demo's
 ├── demos/
 │   └── virtual-infrastructure/   # a folder per demo
@@ -49,15 +54,10 @@ demo-website/
 │   ├── deploy                # pull, start everything, reload Caddy
 │   ├── reset                 # recreate every demo's containers
 │   └── lib.sh                # shared by the two
+├── host/
+│   └── systemd/              # the nightly reset's timer and service, user units
 ├── .env.example              # the shape of .env
 ├── .env                      # you create (gitignored)
 ├── .gitignore
 └── README.md
-```
-
-What the design adds, as it is built:
-
-```text
-demo-website/
-└── infrastructure/           # cloudflared, beside Caddy
 ```

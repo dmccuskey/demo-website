@@ -12,6 +12,7 @@ Everything here is run from the repository's root. Why it works this way is in t
 | Deploy what is checked out, with no `git pull` | `scripts/deploy --no-pull` |
 | Reset every demo | `scripts/reset` |
 | Reset one demo | `scripts/reset <name>` |
+| See when the nightly reset runs next, on the host | `systemctl --user list-timers` |
 | See what runs | `docker compose ls` |
 | Read a demo's logs | `docker compose -p demo-<name> logs` |
 | Stop a demo | `docker compose -p demo-<name> down` |
@@ -94,7 +95,14 @@ scripts/reset
 
 It recreates the containers of every demo, or of the one demo named. A demo's data is on a `tmpfs`, so the demo starts from nothing ([ADR 006](decisions/006-reset-by-recreating-containers.md)). The infrastructure keeps running. A browser tab that is open across the reset reconnects and shows the new system.
 
-On the host a timer runs it each night. The timer is not set up yet ([Current Baseline](development.md#current-baseline)).
+On the host a timer runs it each night, at 04:00 in the host's time zone: the systemd user units in `host/systemd/`, set up as in [The Nightly Reset](installation.md#4-the-nightly-reset).
+
+| To, on the host | Run |
+|---|---|
+| See when it runs next | `systemctl --user list-timers` |
+| Reset now, as the timer does | `systemctl --user start demo-reset.service` |
+| Read its last run | `sudo journalctl _SYSTEMD_USER_UNIT=demo-reset.service -n 20` |
+| Turn it off, and on again | `systemctl --user disable --now demo-reset.timer`, `systemctl --user enable --now demo-reset.timer` |
 
 Reset a demo as a whole, with the script. Restarting one of its containers alone can leave the demo's parts out of step: a data service that restarts alone has lost its records, while its live server still runs on them.
 
