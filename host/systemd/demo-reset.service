@@ -1,0 +1,11 @@
+# Resets every demo: recreates its containers (scripts/reset). Run by demo-reset.timer.
+# A user unit: the repository is in the home folder, and the user is in the docker group.
+[Unit]
+Description=Reset every demo
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/demo-website
+ExecStart=%h/demo-website/scripts/reset

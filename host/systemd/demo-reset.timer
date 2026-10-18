@@ -1,0 +1,10 @@
+# Runs demo-reset.service each night at 04:00, in the host's time zone. A run missed while the
+# host was off is not made up: a reboot starts every demo from nothing anyway.
+[Unit]
+Description=Reset every demo each night
+
+[Timer]
+OnCalendar=*-*-* 04:00:00
+
+[Install]
+WantedBy=timers.target
